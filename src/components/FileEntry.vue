@@ -60,8 +60,8 @@
 		<td class="w-50" data-ls-disabled>
 			<span v-if="file.type === 'folder'">
 				<svg
-					width="1em"
-					height="1em"
+					width="1.5em"
+					height="1.5em"
 					viewBox="0 0 16 16"
 					class="bi bi-folder ml-2 mr-1"
 					fill="currentColor"
@@ -78,17 +78,17 @@
 
 				<span v-on:click="fileClick">
 					<router-link v-bind:to="link">
-						<a href="javascript:null" style="margin-left: 5px;">{{
-							filename
-						}}</a>
+						<a href="javascript:null" style="margin-left: 5px;">
+							{{filename}}
+						</a>
 					</router-link>
 				</span>
 			</span>
 
 			<span v-else>
 				<svg
-					width="1em"
-					height="1em"
+					width="1.5em"
+					height="1.5em"
 					viewBox="0 0 16 16"
 					class="bi bi-file-earmark ml-2 mr-1"
 					fill="currentColor"
@@ -110,7 +110,7 @@
 			<span v-if="file.type === 'file'">{{ uploadDate }}</span>
 		</td>
 		<td class="text-right">
-			<div v-if="file.type === 'file'">
+			<div v-if="file.type === 'file'" class="d-inline-flex">
 				<div class="dropleft">
 					<div
 						v-if="loadingSpinner()"
@@ -147,13 +147,20 @@
 						</svg>
 					</button>
 					<div class="dropdown-menu shadow show" v-if="dropdownOpen">
+						<button class="dropdown-item action p-3" v-on:click="openModal">
+							<svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" fill="currentColor" class="bi bi-eye mr-2 ml-1" viewBox="0 0 16 16">
+								<path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+								<path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+							</svg>
+							Details
+						</button>
 						<button
 							class="dropdown-item action p-3"
 							v-on:click="download"
 						>
 							<svg
-								width="1.5em"
-								height="1.5em"
+								width="1.2em"
+								height="1.2em"
 								viewBox="0 0 16 16"
 								class="bi bi-cloud-download mr-2 ml-1"
 								fill="currentColor"
@@ -175,8 +182,8 @@
 							v-on:click="share"
 						>
 							<svg
-								width="2em"
-								height="2em"
+								width="1.5em"
+								height="1.5em"
 								viewBox="0 0 16 16"
 								class="bi bi-link-45deg mr-1"
 								fill="currentColor"
@@ -197,8 +204,8 @@
 							v-on:click="confirmDeletion"
 						>
 							<svg
-								width="2em"
-								height="2em"
+								width="1.5em"
+								height="1.5em"
 								viewBox="0 0 16 16"
 								class="bi bi-x mr-1"
 								fill="currentColor"
@@ -243,8 +250,8 @@
 									v-on:click="cancelDeletion"
 								>
 									<svg
-										width="2em"
-										height="2em"
+										width="1.5em"
+										height="1.5em"
 										viewBox="0 0 16 16"
 										class="bi bi-x mr-1"
 										fill="green"
@@ -306,8 +313,8 @@
 							v-on:click="confirmDeletion"
 						>
 							<svg
-								width="2em"
-								height="2em"
+								width="1.5em"
+								height="1.5em"
 								viewBox="0 0 16 16"
 								class="bi bi-x mr-1"
 								fill="currentColor"
@@ -352,8 +359,8 @@
 									v-on:click="cancelDeletion"
 								>
 									<svg
-										width="2em"
-										height="2em"
+										width="1.5em"
+										height="1.5em"
 										viewBox="0 0 16 16"
 										class="bi bi-x mr-1"
 										fill="green"
@@ -412,6 +419,10 @@ export default {
 	},
 
 	methods: {
+		openModal() {
+			this.$store.commit("files/openModal", this.path + this.file.Key);
+		},
+
 		loadingSpinner() {
 			return !!this.$store.state.files.filesToBeDeleted.find(
 				file => file === this.file

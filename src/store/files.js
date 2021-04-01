@@ -12,6 +12,8 @@ const listCache = new Map();
 export default {
 	namespaced: true,
 	state: {
+		s3: null,
+		accessKey: null,
 		s3: new S3Client({}),
 		path: "",
 		bucket: "",
@@ -23,14 +25,16 @@ export default {
 		shiftSelectedFiles: [],
 		filesToBeDeleted: [],
 		getSharedLink: null,
-		getObjectLocations: null,
+		getObjectMapUrl: null,
 		openedDropdown: null,
 		headingSorted: "name",
 		orderBy: "asc",
-		createFolderInputShow: false
+		createFolderInputShow: false,
+
+		modalPath: null
 	},
 	getters: {
-		sortedFiles(state) {
+		sortedFiles: state => {
 			// default sort case
 			const sortByHeading = (a, b) =>
 				a[state.headingSorted] - b[state.headingSorted];
@@ -41,8 +45,6 @@ export default {
 					new Date(a.LastModified) - new Date(b.LastModified),
 				name: (a, b) => a.Key.localeCompare(b.Key)
 			};
-
-			console.log(state.headingSorted);
 
 			// sort by appropriate function
 			const sortedFiles = R.sort(
@@ -63,7 +65,17 @@ export default {
 			];
 
 			return groupedFiles;
-		}
+		},
+
+		preSignedUrl: state => url => {
+					console.log({state: { ...state }, url});
+
+					return state.s3.getSignedUrl("getObject", {
+						Bucket: state.bucket,
+						Key: url
+					})
+				}
+			
 	},
 	mutations: {
 		init(
@@ -75,9 +87,16 @@ export default {
 				endpoint = "https://gateway.tardigradeshare.io",
 				browserRoot,
 				getSharedLink = () => "javascript:null",
-				getObjectLocations = () => [
-					{ Latitude: 45.5248, Longitude: -122.6789 }
-				]
+				getObjectMapUrl = () =>
+					new Promise(resolve =>
+						setTimeout(
+							() =>
+								resolve(
+									"https://link.staging.tardigradeshare.io/s/jvgmjntaucpfedohxn3ogdrsfcfa/homepage/TardigradeExplainerVideo.m4v?map=1"
+								),
+							1000
+						)
+					)
 			}
 		) {
 			const s3Config = {
@@ -91,11 +110,13 @@ export default {
 				region: 'REGION',
 			};
 
-			state.s3 = new S3Client(s3Config);
+			state.s3 = new S3(s3Config);
+			state.accessKey = accessKey;
+
 			state.bucket = bucket;
 			state.browserRoot = browserRoot;
 			state.getSharedLink = getSharedLink;
-			state.getObjectLocations = getObjectLocations;
+			state.getObjectMapUrl = getObjectMapUrl;
 		},
 
 		updateFiles(state, { path, files }) {
@@ -163,6 +184,14 @@ export default {
 
 		setCreateFolderInputShow(state, value) {
 			state.createFolderInputShow = value;
+		},
+
+		openModal(state, path) {
+			state.modalPath = path;
+		},
+
+		closeModal(state) {
+			state.modalPath = null;
 		}
 	},
 	actions: {
@@ -382,7 +411,7 @@ export default {
 
 		async download({ state }, file) {
 			const url = state.files.s3.getSignedUrl("getObject", {
-				Bucket: state.stargateBucket,
+				Bucket: state.bucket,
 				Key: state.path + file.Key
 			});
 
